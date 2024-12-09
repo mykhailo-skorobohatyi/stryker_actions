@@ -34,7 +34,7 @@ jobs:
 
       # Merge step runs only on the last matrix item
       - name: Merge Mutation Reports
-        if: ${{ join(fromJson(needs.mutation-tests.outputs.matrix), ',') == matrix.dir }}
+        if: ${{ matrix.dir == fromJson(needs.mutation-tests.outputs.matrix)[fromJson(needs.mutation-tests.outputs.matrix) | length - 1] }}
         run: |
           ls -ln
           echo "All dirs created"
