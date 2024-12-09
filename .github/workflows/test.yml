@@ -1,0 +1,40 @@
+name: Testing the action
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  mutation-tests:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
+    steps:
+      - name: Generate Matrix Data
+        id: generate-matrix
+        run: |
+          echo '["dir1", "dir2", "dir3"]' > matrix.json
+          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+
+  creating-files:
+    needs: mutation-tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: ${{ fromJson(needs.mutation-tests.outputs.matrix) }}
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Files in Directory
+        run: mkdir -p ${{ matrix.dir }} && touch ${{ matrix.dir }}/file.txt
+
+      # Merge step runs only on the last matrix item
+      - name: Merge Mutation Reports
+        if: ${{ join(fromJson(needs.mutation-tests.outputs.matrix), ',') == matrix.dir }}
+        run: |
+          ls -ln
+          echo "All dirs created"
