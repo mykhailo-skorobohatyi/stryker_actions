@@ -10,12 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.generate-matrix.outputs.matrix }}
+      last-dir: ${{ steps.generate-matrix.outputs.last-dir }}
     steps:
       - name: Generate Matrix Data
         id: generate-matrix
         run: |
           echo '["dir1", "dir2", "dir3"]' > matrix.json
           echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
+          echo "last-dir=$(jq -r '.[-1]' matrix.json)" >> $GITHUB_OUTPUT
 
   creating-files:
     needs: mutation-tests
@@ -34,7 +36,7 @@ jobs:
 
       # Merge step runs only on the last matrix item
       - name: Merge Mutation Reports
-        if: ${{ matrix.dir == fromJson(needs.mutation-tests.outputs.matrix)[fromJson(needs.mutation-tests.outputs.matrix) | length - 1] }}
+        if: ${{ matrix.dir == needs.mutation-tests.outputs.last-dir }}
         run: |
           ls -ln
-          echo "All dirs created"
+          echo "All dirs are created"
