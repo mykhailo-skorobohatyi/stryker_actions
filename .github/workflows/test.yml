@@ -33,8 +33,10 @@ jobs:
       run: |
         echo "should-run is TRUE"
         echo "This step should run if valid_dirs is not empty."
+        echo "valid_dirs:${{ env.valid_dirs }}."
     - name: Test if Empty valid_dirs Condition
       if: steps.check-dirs.outputs.should-run != 'true'
       run: |
         echo "should-run NOT TRUE"
         echo "This step should NOT run if valid_dirs is not empty."
+        echo "valid_dirs:${{ env.valid_dirs }}."
