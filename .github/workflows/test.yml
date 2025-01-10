@@ -13,7 +13,7 @@ jobs:
       run: |
         # Simulate different scenarios for valid_dirs
         echo "## Simulating an empty valid_dirs"
-        echo "valid_dirs= " >> $GITHUB_ENV
+        echo "valid_dirs=test/dir and/one/more" >> $GITHUB_ENV
 
     - name: Check for Valid Directories
       id: check-dirs
