@@ -15,14 +15,26 @@ jobs:
         echo "## Simulating an empty valid_dirs"
         echo "valid_dirs= " >> $GITHUB_ENV
 
-    - name: Test Empty valid_dirs Condition
-      if: ${{ env.valid_dirs == '' || env.valid_dirs == null || env.valid_dirs == ' ' }}
+    - name: Check for Valid Directories
+      id: check-dirs
       run: |
-        echo "Condition passed: valid_dirs is empty."
-        echo "Test successful: Workflow correctly identifies an empty valid_dirs."
+        # Trim spaces from the valid_dirs variable
+        TRIMMED_VALID_DIRS=$(echo "${{ env.valid_dirs }}" | xargs)
+        if [ -z "$TRIMMED_VALID_DIRS" ]; then
+          echo "No valid directories found. Skipping workflow."
+          echo "should-run=false" >> $GITHUB_OUTPUT
+        else
+          echo "Valid directories found: $TRIMMED_VALID_DIRS"
+          echo "should-run=true" >> $GITHUB_OUTPUT
+        fi
 
     - name: Test Non-Empty valid_dirs Condition
-      if: env.valid_dirs != ''
+      if: steps.check-dirs.outputs.should-run == 'true'
       run: |
-        echo "Condition failed: valid_dirs is not empty."
-        echo "This step should not run if valid_dirs is empty."
+        echo "should-run is TRUE"
+        echo "This step should run if valid_dirs is not empty."
+    - name: Test if Empty valid_dirs Condition
+      if: steps.check-dirs.outputs.should-run != 'true'
+      run: |
+        echo "should-run NOT TRUE"
+        echo "This step should NOT run if valid_dirs is not empty."
