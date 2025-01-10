@@ -16,7 +16,7 @@ jobs:
         echo "valid_dirs= " >> $GITHUB_ENV
 
     - name: Test Empty valid_dirs Condition
-      if: ${{ env.valid_dirs == '' || env.valid_dirs == ' ' || env.valid_dirs == null || !env.valid_dirs.trim() }}
+      if: ${{ env.valid_dirs == '' || env.valid_dirs == null || env.valid_dirs == ' ' }}
       run: |
         echo "Condition passed: valid_dirs is empty."
         echo "Test successful: Workflow correctly identifies an empty valid_dirs."
