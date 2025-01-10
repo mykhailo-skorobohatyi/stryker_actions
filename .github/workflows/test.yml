@@ -1,42 +1,28 @@
-name: Testing the action
+name: Test valid_dirs Condition
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
-  mutation-tests:
+  test-condition:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.generate-matrix.outputs.matrix }}
-      last-dir: ${{ steps.generate-matrix.outputs.last-dir }}
-    steps:
-      - name: Generate Matrix Data
-        id: generate-matrix
-        run: |
-          echo '["dir1", "dir2", "dir3"]' > matrix.json
-          echo "matrix=$(cat matrix.json)" >> $GITHUB_OUTPUT
-          echo "last-dir=$(jq -r '.[-1]' matrix.json)" >> $GITHUB_OUTPUT
-
-  creating-files:
-    needs: mutation-tests
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        dir: ${{ fromJson(needs.mutation-tests.outputs.matrix) }}
-      fail-fast: false
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Set up Test Environment
+      id: changed-dirs
+      run: |
+        # Simulate different scenarios for valid_dirs
+        echo "## Simulating an empty valid_dirs"
+        echo "valid_dirs=" >> $GITHUB_ENV
 
-      - name: Create Files in Directory
-        run: mkdir -p ${{ matrix.dir }} && touch ${{ matrix.dir }}/file.txt
+    - name: Test Empty valid_dirs Condition
+      if: env.valid_dirs == ''
+      run: |
+        echo "Condition passed: valid_dirs is empty."
+        echo "Test successful: Workflow correctly identifies an empty valid_dirs."
 
-      # Merge step runs only on the last matrix item
-      - name: Merge Mutation Reports
-        if: ${{ matrix.dir == needs.mutation-tests.outputs.last-dir }}
-        run: |
-          ls -ln
-          echo "All dirs are created"
+    - name: Test Non-Empty valid_dirs Condition
+      if: env.valid_dirs != ''
+      run: |
+        echo "Condition failed: valid_dirs is not empty."
+        echo "This step should not run if valid_dirs is empty."
